@@ -27,20 +27,15 @@ app.add_middleware(
 
 # ROUTES
 
-app.include_router(TeasRouter, prefix="/api")
-app.include_router(CommentsRouter, prefix="/api")
+app.include_router(RestaurantsRouter, prefix="/api")
 app.include_router(UserRouter, prefix="/api")
 
-
-
-# Example middleware
-def help():
-    return "SOS noooooow!!!!!"
-
 @app.get("/")
-def home(mamamia: str = Depends(help)):
-    return {"message": mamamia}
+def home():
+    return {
+        "message": "Welcome to Restaurant Review Platform API"
+    }
 
 @app.get("/health")
 def health_check():
-    return {"ok": True}
+    return {"status": "ok", "message": "Server is running"}
