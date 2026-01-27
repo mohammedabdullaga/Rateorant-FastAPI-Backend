@@ -77,14 +77,14 @@ def seed_database():
 
         # Create categories
         categories = [
-            CategoryModel(name="Italian"),
-            CategoryModel(name="Japanese"),
-            CategoryModel(name="Mexican"),
-            CategoryModel(name="Chinese"),
-            CategoryModel(name="French"),
-            CategoryModel(name="Indian"),
-            CategoryModel(name="Thai"),
-            CategoryModel(name="American"),
+            CategoryModel(category="Italian"),
+            CategoryModel(category="Japanese"),
+            CategoryModel(category="Mexican"),
+            CategoryModel(category="Chinese"),
+            CategoryModel(category="French"),
+            CategoryModel(category="Indian"),
+            CategoryModel(category="Thai"),
+            CategoryModel(category="American"),
         ]
 
         for category in categories:
@@ -143,11 +143,11 @@ def seed_database():
         print(f"✓ Created {len(restaurants)} restaurants")
 
         # Associate restaurants with categories
-        italian_cat = db.query(CategoryModel).filter(CategoryModel.name == "Italian").first()
-        japanese_cat = db.query(CategoryModel).filter(CategoryModel.name == "Japanese").first()
-        mexican_cat = db.query(CategoryModel).filter(CategoryModel.name == "Mexican").first()
-        chinese_cat = db.query(CategoryModel).filter(CategoryModel.name == "Chinese").first()
-        french_cat = db.query(CategoryModel).filter(CategoryModel.name == "French").first()
+        italian_cat = db.query(CategoryModel).filter(CategoryModel.category == "Italian").first()
+        japanese_cat = db.query(CategoryModel).filter(CategoryModel.category == "Japanese").first()
+        mexican_cat = db.query(CategoryModel).filter(CategoryModel.category == "Mexican").first()
+        chinese_cat = db.query(CategoryModel).filter(CategoryModel.category == "Chinese").first()
+        french_cat = db.query(CategoryModel).filter(CategoryModel.category == "French").first()
 
         bella_italia = db.query(RestaurantModel).filter(RestaurantModel.name == "La Bella Italia").first()
         sakura_sushi = db.query(RestaurantModel).filter(RestaurantModel.name == "Sakura Sushi").first()
