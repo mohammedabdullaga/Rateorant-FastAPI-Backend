@@ -41,6 +41,7 @@ class UserModel(BaseModel):
             "iat": datetime.now(timezone.utc),
             "sub": str(self.id),
             "username": self.username,
+            "role": self.role,
         }
 
         token = jwt.encode(payload, secret, algorithm="HS256")
