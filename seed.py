@@ -85,6 +85,18 @@ def seed_database():
             CategoryModel(category="Indian"),
             CategoryModel(category="Thai"),
             CategoryModel(category="American"),
+            CategoryModel(category="Mediterranean"),
+            CategoryModel(category="Korean"),
+            CategoryModel(category="Vietnamese"),
+            CategoryModel(category="Greek"),
+            CategoryModel(category="Spanish"),
+            CategoryModel(category="Turkish"),
+            CategoryModel(category="Lebanese"),
+            CategoryModel(category="Fast Food"),
+            CategoryModel(category="Seafood"),
+            CategoryModel(category="Vegetarian"),
+            CategoryModel(category="Vegan"),
+            CategoryModel(category="Barbecue"),
         ]
 
         for category in categories:

@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-# SQL Alchemy
 from sqlalchemy.orm import Session
 from models.restaurant import RestaurantModel
 from models.review import ReviewModel
 from models.favorite import FavoriteModel
+from models.category import CategoryModel
 from models.user import UserModel, RoleEnum
 # Serializers
-from serializers.restaurant import RestaurantSchema, RestaurantCreateSchema, RestaurantUpdateSchema, RestaurantDetailSchema
+from serializers.restaurant import RestaurantSchema, RestaurantCreateSchema, RestaurantUpdateSchema, RestaurantDetailSchema, CategorySchema
 from serializers.review import ReviewSchema, ReviewCreateSchema
 from serializers.favorite import FavoriteSchema
 from typing import List
@@ -21,14 +20,18 @@ security = HTTPBearer()
 
 router = APIRouter()
 
-
-# ===== RESTAURANT ENDPOINTS =====
-
 @router.get("/restaurants", response_model=List[RestaurantSchema])
 def get_restaurants(db: Session = Depends(get_db)):
     """Get all restaurants"""
     restaurants = db.query(RestaurantModel).all()
     return restaurants
+
+
+@router.get("/categories", response_model=List[CategorySchema])
+def get_categories(db: Session = Depends(get_db)):
+    """Get all available categories"""
+    categories = db.query(CategoryModel).all()
+    return categories
 
 
 @router.get("/restaurants/{restaurant_id}", response_model=RestaurantDetailSchema)
@@ -48,11 +51,20 @@ def create_restaurant(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    """Create a new restaurant"""
-    new_restaurant = RestaurantModel(**restaurant.dict(), owner_id=current_user.id)
+    """Create a new restaurant - only restaurant_owner or admin"""
+    if current_user.role not in [RoleEnum.restaurant_owner, RoleEnum.admin]:
+        raise HTTPException(status_code=403, detail="Only restaurant owners or admins can create restaurants")
+
+    restaurant_data = restaurant.dict(exclude={'category_ids'})
+    new_restaurant = RestaurantModel(**restaurant_data, owner_id=current_user.id)
     db.add(new_restaurant)
     db.commit()
     db.refresh(new_restaurant)
+
+    if restaurant.category_ids:
+        categories = db.query(CategoryModel).filter(CategoryModel.id.in_(restaurant.category_ids)).all()
+        new_restaurant.categories.extend(categories)
+        db.commit()
 
     return new_restaurant
 
@@ -70,15 +82,18 @@ def update_restaurant(
     if not db_restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found")
 
-    # Allow if owner or admin
     if db_restaurant.owner_id != current_user.id and current_user.role != RoleEnum.admin:
         raise HTTPException(status_code=403, detail="Permission Denied")
 
-    # Update fields
-    update_data = restaurant.dict(exclude_unset=True)
+
+    update_data = restaurant.dict(exclude_unset=True, exclude={'category_ids'})
     for field, value in update_data.items():
         if value is not None:
             setattr(db_restaurant, field, value)
+
+    if restaurant.category_ids is not None:
+        categories = db.query(CategoryModel).filter(CategoryModel.id.in_(restaurant.category_ids)).all()
+        db_restaurant.categories = categories
 
     db.add(db_restaurant)
     db.commit()
@@ -99,7 +114,6 @@ def delete_restaurant(
     if not db_restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found")
 
-    # Allow if owner or admin
     if db_restaurant.owner_id != current_user.id and current_user.role != RoleEnum.admin:
         raise HTTPException(status_code=403, detail="Permission Denied")
 
@@ -109,7 +123,6 @@ def delete_restaurant(
     return {"message": "Restaurant deleted successfully"}
 
 
-# ===== REVIEW ENDPOINTS =====
 
 @router.get("/restaurants/{restaurant_id}/reviews", response_model=List[ReviewSchema])
 def get_restaurant_reviews(restaurant_id: int, db: Session = Depends(get_db)):
@@ -134,7 +147,6 @@ def create_review(
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found")
 
-    # Check if user already reviewed this restaurant
     existing_review = db.query(ReviewModel).filter(
         ReviewModel.user_id == current_user.id,
         ReviewModel.restaurant_id == restaurant_id
@@ -154,8 +166,6 @@ def create_review(
 
     return new_review
 
-
-# ===== FAVORITE ENDPOINTS =====
 
 @router.get("/restaurants/{restaurant_id}/favorite")
 def check_favorite(
@@ -183,7 +193,6 @@ def add_favorite(
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found")
 
-    # Check if already favorited
     existing_favorite = db.query(FavoriteModel).filter(
         FavoriteModel.user_id == current_user.id,
         FavoriteModel.restaurant_id == restaurant_id
