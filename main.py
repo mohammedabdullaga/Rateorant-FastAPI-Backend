@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Controllers
-from controllers.teas import router as TeasRouter
-from controllers.comments import router as CommentsRouter
+from controllers.restaurants import router as RestaurantsRouter
 from controllers.users import router as UserRouter
 
 app = FastAPI()
