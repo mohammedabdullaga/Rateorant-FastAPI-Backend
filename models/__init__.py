@@ -4,6 +4,7 @@ from .restaurant import RestaurantModel
 from .category import CategoryModel, restaurant_categories
 from .review import ReviewModel
 from .favorite import FavoriteModel
+from .notification import NotificationModel
 
 __all__ = [
     'BaseModel',
@@ -14,4 +15,5 @@ __all__ = [
     'restaurant_categories',
     'ReviewModel',
     'FavoriteModel',
+    'NotificationModel',
 ]

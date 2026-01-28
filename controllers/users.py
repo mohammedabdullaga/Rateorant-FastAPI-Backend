@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from models.user import UserModel
+from models.user import UserModel, RoleEnum
 from serializers.user import UserSchema, UserRegistrationSchema, UserLoginSchema, UserTokenSchema
 from database import get_db
 
@@ -17,7 +17,10 @@ def create_user(user: UserRegistrationSchema, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=409, detail="Username or email already exists")
 
-    new_user = UserModel(username=user.username, email=user.email)
+    # Map role string to RoleEnum
+    role_enum = RoleEnum.user if user.role == "user" else RoleEnum.restaurant_owner
+    
+    new_user = UserModel(username=user.username, email=user.email, role=role_enum)
     # Use the set_password method to hash the password
     new_user.set_password(user.password)
 
@@ -25,11 +28,11 @@ def create_user(user: UserRegistrationSchema, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-     # Generate JWT token
+    # Generate JWT token
     token = new_user.generate_token()
 
     # Return token and a success message
-    return {"token": token, "message": "Login successful"}
+    return {"token": token, "message": "Registration successful"}
 
 @router.post("/login", response_model=UserTokenSchema)
 def login(user: UserLoginSchema, db: Session = Depends(get_db)):
