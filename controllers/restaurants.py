@@ -178,6 +178,31 @@ def create_review(
     return new_review
 
 
+@router.delete('/restaurants/{restaurant_id}/reviews/{review_id}')
+def delete_review(
+    restaurant_id: int,
+    review_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """Delete a review - only the review author or admin can delete"""
+    review = db.query(ReviewModel).filter(
+        ReviewModel.id == review_id,
+        ReviewModel.restaurant_id == restaurant_id
+    ).first()
+
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    if review.user_id != current_user.id and current_user.role != RoleEnum.admin:
+        raise HTTPException(status_code=403, detail="Permission Denied")
+
+    db.delete(review)
+    db.commit()
+
+    return {"message": "Review deleted successfully"}
+
+
 @router.get("/restaurants/{restaurant_id}/favorite")
 def check_favorite(
     restaurant_id: int,
