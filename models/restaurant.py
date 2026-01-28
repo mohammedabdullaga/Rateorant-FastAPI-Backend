@@ -19,6 +19,7 @@ class RestaurantModel(BaseModel):
     reviews = relationship('ReviewModel', back_populates='restaurant', cascade="all, delete-orphan")
     favorites = relationship('FavoriteModel', back_populates='restaurant', cascade="all, delete-orphan")
     categories = relationship('CategoryModel', secondary='restaurant_categories', back_populates='restaurants')
+    notifications = relationship('NotificationModel', back_populates='restaurant', cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<RestaurantModel(id={self.id}, name={self.name}, owner_id={self.owner_id})>"

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from models.restaurant import RestaurantModel
 from models.review import ReviewModel
 from models.favorite import FavoriteModel
+from models.notification import NotificationModel
 from models.category import CategoryModel
 from models.user import UserModel, RoleEnum
 # Serializers
@@ -163,6 +164,16 @@ def create_review(
     db.add(new_review)
     db.commit()
     db.refresh(new_review)
+
+    notification = NotificationModel(
+        restaurant_id=restaurant_id,
+        user_id=current_user.id,
+        rating=review.rating,
+        message=review.comment,
+        read=False
+    )
+    db.add(notification)
+    db.commit()
 
     return new_review
 

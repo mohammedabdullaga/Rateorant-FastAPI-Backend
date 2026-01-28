@@ -7,6 +7,7 @@ class UserRegistrationSchema(BaseModel):
     username: str
     email: EmailStr
     password: str
+    role: Optional[str] = "user"
 
 
 class UserLoginSchema(BaseModel):

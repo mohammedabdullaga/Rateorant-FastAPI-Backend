@@ -6,6 +6,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 # Controllers
 from controllers.restaurants import router as RestaurantsRouter
 from controllers.users import router as UserRouter
+from controllers.notifications import router as NotificationsRouter
 
 app = FastAPI()
 
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_origins=origins,     # Which sites can call this API
     allow_methods=["*"],       # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],       # Allow all headers (e.g., Content-Type, Authorization)
+    allow_credentials=True,
 )
 
 
@@ -30,6 +32,7 @@ app.add_middleware(
 
 app.include_router(RestaurantsRouter, prefix="/api")
 app.include_router(UserRouter, prefix="/api")
+app.include_router(NotificationsRouter, prefix="/api/notifications")
 
 @app.get("/")
 def home():

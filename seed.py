@@ -7,17 +7,18 @@ from models.restaurant import RestaurantModel
 from models.category import CategoryModel
 from models.review import ReviewModel
 from models.favorite import FavoriteModel
+from models.notification import NotificationModel
 
 
 def create_tables():
     """Create all database tables"""
     # Drop all tables first to ensure fresh start
     BaseModel.metadata.drop_all(bind=engine)
-    print("✓ Dropped all tables")
+    print("OK Dropped all tables")
     
     # Create all tables
     BaseModel.metadata.create_all(bind=engine)
-    print("✓ Database tables created successfully")
+    print("OK Database tables created successfully")
 
 
 def seed_database():
@@ -27,12 +28,13 @@ def seed_database():
     try:
         # Clear existing data
         db.query(FavoriteModel).delete()
+        db.query(NotificationModel).delete()
         db.query(ReviewModel).delete()
         db.query(RestaurantModel).delete()
         db.query(CategoryModel).delete()
         db.query(UserModel).delete()
         db.commit()
-        print("✓ Cleared existing data")
+        print("OK Cleared existing data")
 
         # Create users
         users = [
@@ -44,12 +46,12 @@ def seed_database():
             UserModel(
                 username="jane_reviewer",
                 email="jane@example.com",
-                role=RoleEnum.reviewer
+                role=RoleEnum.user
             ),
             UserModel(
                 username="mike_reviewer",
                 email="mike@example.com",
-                role=RoleEnum.reviewer
+                role=RoleEnum.user
             ),
             UserModel(
                 username="owner_sarah",
@@ -64,7 +66,7 @@ def seed_database():
             UserModel(
                 username="emily_reviewer",
                 email="emily@example.com",
-                role=RoleEnum.reviewer
+                role=RoleEnum.user
             ),
         ]
 
@@ -73,7 +75,7 @@ def seed_database():
             db.add(user)
 
         db.commit()
-        print(f"✓ Created {len(users)} users")
+        print(f"OK Created {len(users)} users")
 
         # Create categories
         categories = [
@@ -103,7 +105,7 @@ def seed_database():
             db.add(category)
 
         db.commit()
-        print(f"✓ Created {len(categories)} categories")
+        print(f"OK Created {len(categories)} categories")
 
         # Get the owner users
         owner_sarah = db.query(UserModel).filter(UserModel.username == "owner_sarah").first()
@@ -152,7 +154,7 @@ def seed_database():
             db.add(restaurant)
 
         db.commit()
-        print(f"✓ Created {len(restaurants)} restaurants")
+        print(f"OK Created {len(restaurants)} restaurants")
 
         # Associate restaurants with categories
         italian_cat = db.query(CategoryModel).filter(CategoryModel.category == "Italian").first()
@@ -174,7 +176,7 @@ def seed_database():
         le_petit_bistro.categories.append(french_cat)
 
         db.commit()
-        print("✓ Associated restaurants with categories")
+        print("OK Associated restaurants with categories")
 
         # Create reviews
         jane = db.query(UserModel).filter(UserModel.username == "jane_reviewer").first()
@@ -224,7 +226,7 @@ def seed_database():
             db.add(review)
 
         db.commit()
-        print(f"✓ Created {len(reviews)} reviews")
+        print(f"OK Created {len(reviews)} reviews")
 
         # Create favorites
         favorites = [
@@ -254,13 +256,65 @@ def seed_database():
             db.add(favorite)
 
         db.commit()
-        print(f"✓ Created {len(favorites)} favorites")
+        print(f"OK Created {len(favorites)} favorites")
 
-        print("\n✓ Database seeding completed successfully!")
+        # Create notifications (simulating notifications from reviews)
+        notifications = [
+            NotificationModel(
+                restaurant_id=bella_italia.id,
+                user_id=jane.id,
+                rating=5,
+                message="Jane Reviewer left a 5-star review: 'Absolutely delicious! The pasta was perfectly al dente and the sauce was authentic.'",
+                read=False
+            ),
+            NotificationModel(
+                restaurant_id=sakura_sushi.id,
+                user_id=mike.id,
+                rating=4,
+                message="Mike Reviewer left a 4-star review: 'Great sushi quality, but service was a bit slow today.'",
+                read=False
+            ),
+            NotificationModel(
+                restaurant_id=el_mariachi.id,
+                user_id=emily.id,
+                rating=5,
+                message="Emily Reviewer left a 5-star review: 'Fantastic Mexican food! The tacos were incredible.'",
+                read=False
+            ),
+            NotificationModel(
+                restaurant_id=golden_dragon.id,
+                user_id=jane.id,
+                rating=4,
+                message="Jane Reviewer left a 4-star review: 'Delicious Chinese cuisine with generous portions.'",
+                read=False
+            ),
+            NotificationModel(
+                restaurant_id=le_petit_bistro.id,
+                user_id=mike.id,
+                rating=5,
+                message="Mike Reviewer left a 5-star review: 'Authentic French bistro experience. Loved the ambiance!'",
+                read=False
+            ),
+            NotificationModel(
+                restaurant_id=bella_italia.id,
+                user_id=emily.id,
+                rating=3,
+                message="Emily Reviewer left a 3-star review: 'Good food but a bit pricey for the portion size.'",
+                read=False
+            ),
+        ]
+
+        for notification in notifications:
+            db.add(notification)
+
+        db.commit()
+        print(f"OK Created {len(notifications)} notifications")
+
+        print("\nOK Database seeding completed successfully!")
 
     except Exception as e:
         db.rollback()
-        print(f"✗ Error seeding database: {str(e)}")
+        print(f"ERROR seeding database: {str(e)}")
         raise
 
     finally:

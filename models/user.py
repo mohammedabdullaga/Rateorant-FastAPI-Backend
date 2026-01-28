@@ -11,7 +11,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class RoleEnum(str, enum.Enum):
     admin = "admin"
-    reviewer = "reviewer"
+    user = "user"
     restaurant_owner = "restaurant_owner"
 
 class UserModel(BaseModel):
@@ -22,7 +22,7 @@ class UserModel(BaseModel):
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
-    role = Column(SQLEnum(RoleEnum), default=RoleEnum.reviewer, nullable=False)
+    role = Column(SQLEnum(RoleEnum), default=RoleEnum.user, nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
 
     reviews = relationship('ReviewModel', back_populates='user', cascade="all, delete-orphan")
@@ -41,7 +41,7 @@ class UserModel(BaseModel):
             "iat": datetime.now(timezone.utc),
             "sub": str(self.id),
             "username": self.username,
-            "role": self.role,
+            "role": self.role.value,  # Convert enum to string value
         }
 
         token = jwt.encode(payload, secret, algorithm="HS256")
