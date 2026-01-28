@@ -35,6 +35,17 @@ def get_categories(db: Session = Depends(get_db)):
     return categories
 
 
+@router.get("/categories/{category_id}/restaurants", response_model=List[RestaurantSchema])
+def get_restaurants_by_category(category_id: int, db: Session = Depends(get_db)):
+    """Get all restaurants for a specific category"""
+    category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    # The relationship on CategoryModel returns associated restaurants
+    return category.restaurants
+
+
 @router.get("/restaurants/{restaurant_id}", response_model=RestaurantDetailSchema)
 def get_single_restaurant(restaurant_id: int, db: Session = Depends(get_db)):
     """Get a single restaurant with details"""
