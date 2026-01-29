@@ -8,7 +8,7 @@ class NotificationModel(BaseModel):
 
     id = Column(Integer, primary_key=True, index=True)
     restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # the reviewer who caused the notification
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)  
     rating = Column(Integer, nullable=True)
     message = Column(String, nullable=False)
     read = Column(Boolean, default=False, nullable=False)

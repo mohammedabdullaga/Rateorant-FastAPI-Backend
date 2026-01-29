@@ -13,10 +13,8 @@ from dependencies.get_current_user import get_current_user
 
 router = APIRouter(tags=["notifications"]) 
 
-@router.get("", response_model=List[dict])
 @router.get("/", response_model=List[dict])
 def get_notifications(current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Get notifications for restaurants owned by the current user"""
     owner_restaurants = db.query(RestaurantModel).filter(RestaurantModel.owner_id == current_user.id).all()
     if not owner_restaurants:
         return []
